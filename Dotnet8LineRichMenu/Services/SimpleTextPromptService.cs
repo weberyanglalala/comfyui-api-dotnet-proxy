@@ -117,4 +117,28 @@ public class SimpleTextPromptService
             return false;
         }
     }
+    
+    public async Task<bool> CheckPromptStatusWithRetry(string promptId, int maxRetries = 10, int retryDelayMs = 5000)
+    {
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            bool promptStatus = await GetPromptStatus(promptId);
+        
+            if (promptStatus)
+            {
+                return true;
+            }
+        
+            if (attempt < maxRetries)
+            {
+                Console.WriteLine($"Attempt {attempt} failed. Retrying in {retryDelayMs/1000} seconds...");
+                await Task.Delay(retryDelayMs);
+            }
+            else
+            {
+                Console.WriteLine($"Max retries ({maxRetries}) reached. Prompt status check failed.");
+            }
+        }
+        return false;
+    }
 }

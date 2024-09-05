@@ -17,7 +17,9 @@ public class MessagesController : LineWebHookControllerBase
     private readonly string _domain;
 
     public MessagesController(
-        LineMessagingApiSettings lineMessagingApiSettings, IConfiguration configuration, SimpleTextPromptService simpleTextPromptService, StableDiffusionPromptEnhancerService stableDiffusionPromptEnhancerService, CloudinaryService cloudinaryService)
+        LineMessagingApiSettings lineMessagingApiSettings, IConfiguration configuration,
+        SimpleTextPromptService simpleTextPromptService,
+        StableDiffusionPromptEnhancerService stableDiffusionPromptEnhancerService, CloudinaryService cloudinaryService)
     {
         _lineMessagingApiSettings = lineMessagingApiSettings;
         _configuration = configuration;
@@ -39,15 +41,19 @@ public class MessagesController : LineWebHookControllerBase
             foreach (var lineEvent in ReceivedMessage.events)
             {
                 DisplayLoadingAnimation(lineEvent.source.userId, 30);
-                var promptObject =  await _stableDiffusionPromptEnhancerService.CreateEnhancedPrompt(lineEvent.message.text);
-                var promptId = await _simpleTextPromptService.CreatePromptAsync(promptObject.PositivePrompt, promptObject.NegativePrompt);
+                var promptObject =
+                    await _stableDiffusionPromptEnhancerService.CreateEnhancedPrompt(lineEvent.message.text);
+                var promptId =
+                    await _simpleTextPromptService.CreatePromptAsync(promptObject.PositivePrompt,
+                        promptObject.NegativePrompt);
                 bool promptStatus = false;
-                promptStatus = await CheckPromptStatusWithRetry(promptId);
+                promptStatus = await _simpleTextPromptService.CheckPromptStatusWithRetry(promptId);
                 if (!promptStatus)
                 {
                     PushMessage(_adminUserId, "系統忙碌中，請稍後再試。");
                     return Ok();
                 }
+
                 var imageUrl = await _simpleTextPromptService.GetImageByPromptId(promptId);
                 var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
                 Console.WriteLine(publicUrl);
@@ -171,30 +177,5 @@ public class MessagesController : LineWebHookControllerBase
         // Read the file into a byte array
         byte[] pngImage = System.IO.File.ReadAllBytes(fullPath);
         return pngImage;
-    }
-    
-    public async Task<bool> CheckPromptStatusWithRetry(string promptId, int maxRetries = 10, int retryDelayMs = 5000)
-    {
-        for (int attempt = 1; attempt <= maxRetries; attempt++)
-        {
-            bool promptStatus = await _simpleTextPromptService.GetPromptStatus(promptId);
-        
-            if (promptStatus)
-            {
-                return true;
-            }
-        
-            if (attempt < maxRetries)
-            {
-                Console.WriteLine($"Attempt {attempt} failed. Retrying in {retryDelayMs/1000} seconds...");
-                await Task.Delay(retryDelayMs);
-            }
-            else
-            {
-                Console.WriteLine($"Max retries ({maxRetries}) reached. Prompt status check failed.");
-            }
-        }
-    
-        return false;
     }
 }
