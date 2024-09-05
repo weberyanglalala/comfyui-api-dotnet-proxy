@@ -1,0 +1,8 @@
+namespace Dotnet8LineRichMenu.Models.Settings;
+
+public class CloudinarySettings
+{
+    public string ApiKey { get; set; }
+    public string CloudName { get; set; }
+    public string ApiSecret { get; set; }
+}
