@@ -41,8 +41,10 @@ public class MessagesController : LineWebHookControllerBase
             foreach (var lineEvent in ReceivedMessage.events)
             {
                 DisplayLoadingAnimation(lineEvent.source.userId, 30);
+                var optimizePrompt =
+                    await _stableDiffusionPromptEnhancerService.OptimizePromptToEnglish(lineEvent.message.text);
                 var promptId =
-                    await _simpleTextPromptService.CreateFluxOptimizedAsync(lineEvent.message.text);
+                    await _simpleTextPromptService.CreateFluxOptimizedAsync(optimizePrompt);
                 bool promptStatus = false;
                 promptStatus = await _simpleTextPromptService.CheckPromptStatusWithRetry(promptId);
                 if (!promptStatus)
