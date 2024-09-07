@@ -41,16 +41,13 @@ public class MessagesController : LineWebHookControllerBase
             foreach (var lineEvent in ReceivedMessage.events)
             {
                 DisplayLoadingAnimation(lineEvent.source.userId, 30);
-                var promptObject =
-                    await _stableDiffusionPromptEnhancerService.CreateEnhancedPrompt(lineEvent.message.text);
                 var promptId =
-                    await _simpleTextPromptService.CreatePromptAsync(promptObject.PositivePrompt,
-                        promptObject.NegativePrompt);
+                    await _simpleTextPromptService.CreateFluxOptimizedAsync(lineEvent.message.text);
                 bool promptStatus = false;
                 promptStatus = await _simpleTextPromptService.CheckPromptStatusWithRetry(promptId);
                 if (!promptStatus)
                 {
-                    PushMessage(_adminUserId, "系統忙碌中，請稍後再試。");
+                    PushMessage(lineEvent.source.userId, "系統忙碌中，請稍後再試。");
                     return Ok();
                 }
 
@@ -66,7 +63,7 @@ public class MessagesController : LineWebHookControllerBase
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            PushMessage(_adminUserId, "系統忙碌中，請稍後再試。");
+            PushMessage(_adminUserId, ex.Message);
             return Ok();
         }
     }

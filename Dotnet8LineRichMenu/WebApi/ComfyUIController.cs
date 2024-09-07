@@ -88,4 +88,21 @@ public class ComfyUIController : ControllerBase
         var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
         return Ok(publicUrl);
     }
+    
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateImageByFluxOptimized([FromBody] CreateImageByPrompt request)
+    {
+        var promptId =
+            await _simpleTextPromptService.CreateFluxOptimizedAsync(request.Prompt);
+        bool promptStatus = false;
+        promptStatus = await _simpleTextPromptService.CheckPromptStatusWithRetry(promptId);
+        if (!promptStatus)
+        {
+            return BadRequest("系統忙碌中，請稍後再試。");
+        }
+        var imageUrl = await _simpleTextPromptService.GetImageByPromptId(promptId);
+        var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
+        return Ok(publicUrl);
+    }
 }

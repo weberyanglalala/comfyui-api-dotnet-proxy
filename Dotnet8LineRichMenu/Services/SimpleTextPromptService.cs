@@ -20,6 +20,46 @@ public class SimpleTextPromptService
         _clientId = settings.ClientId;
         _httpClient = httpClientFactory.CreateClient();
     }
+    
+    public async Task<string> CreateFluxOptimizedAsync(string prompt)
+    {
+        var endpoint = $"{_endpoint}/prompt";
+
+        // Load and deserialize JSON using Newtonsoft.Json
+        var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "json", "FluxOptimizedPrompt.json");
+        var jsonData = await File.ReadAllTextAsync(jsonFilePath);
+
+        // Use JObject to access dynamic properties
+        var jsonPrompt = JObject.Parse(jsonData);
+
+        // Initialize the seed
+        var random = new Random();
+        if (jsonPrompt.ContainsKey("6"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["93"]["inputs"]["seed"] = random.Next(1, 1000000);
+        }
+        
+        // get the target node
+        if (jsonPrompt.ContainsKey("6"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["6"]["inputs"]["text"] = prompt;
+        }
+        
+        // Create the request object
+        var request = new JObject();
+        request["prompt"] = jsonPrompt;
+        request["client_id"] = _clientId;
+
+        // Send the request to the ComfyUI API
+        var httpContent = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(endpoint, httpContent);
+        response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
+        var responseContent = JsonSerializer.Deserialize<CreatePromptResponse>(responseString);
+        return responseContent.PromptId;
+    }
 
     public async Task<string> CreatePromptAsync(string positivePrompt, string negativePrompt)
     {
