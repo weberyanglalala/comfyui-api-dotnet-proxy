@@ -165,7 +165,6 @@ public class SimpleTextPromptService
 
         // https://{{domain}}/view?filename=ComfyUI_00095_.png&subfolder=&type=output
         var result = $"{_endpoint}/view?subfolder={imageSubfolder}&type={imageType}&filename={imageFileName}";
-        Console.WriteLine(result);
         return result;
     }
 

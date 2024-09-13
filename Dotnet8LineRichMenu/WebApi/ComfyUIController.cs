@@ -117,4 +117,12 @@ public class ComfyUIController : ControllerBase
             await _simpleTextPromptService.CreateFluxPromptWithSeedAndCustomPrompt(request.Prompt, request.Seed);
         return Ok(result);
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetPromptImageUrlByPromptId([FromQuery] string promptId)
+    {
+        var imageUrl = await _simpleTextPromptService.GetImageByPromptId(promptId);
+        var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
+        return Ok(publicUrl);
+    }
 }
