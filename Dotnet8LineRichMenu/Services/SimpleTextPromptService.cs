@@ -20,7 +20,46 @@ public class SimpleTextPromptService
         _clientId = settings.ClientId;
         _httpClient = httpClientFactory.CreateClient();
     }
-    
+
+    public async Task<CreateFluxPromptResult> CreateFluxPromptWithSeedAndCustomPrompt(string prompt, int seed)
+    {
+        var endpoint = $"{_endpoint}/prompt";
+
+        // Load and deserialize JSON using Newtonsoft.Json
+        var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "json", "FluxOptimizedPrompt.json");
+        var jsonData = await File.ReadAllTextAsync(jsonFilePath);
+
+        // Use JObject to access dynamic properties
+        var jsonPrompt = JObject.Parse(jsonData);
+
+        // Initialize the seed
+        if (jsonPrompt.ContainsKey("6"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["93"]["inputs"]["seed"] = seed;
+        }
+
+        // get the target node
+        if (jsonPrompt.ContainsKey("6"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["6"]["inputs"]["text"] = prompt;
+        }
+
+        // Create the request object
+        var request = new JObject();
+        request["prompt"] = jsonPrompt;
+        request["client_id"] = _clientId;
+        var jsonString = JsonConvert.SerializeObject(request);
+        // Send the request to the ComfyUI API
+        var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(endpoint, httpContent);
+        response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
+        var responseContent = JsonSerializer.Deserialize<CreatePromptResponse>(responseString);
+        return new CreateFluxPromptResult() { PromptId = responseContent.PromptId, Prompt = request.ToString() };
+    }
+
     public async Task<string> CreateFluxOptimizedAsync(string prompt)
     {
         var endpoint = $"{_endpoint}/prompt";
@@ -39,14 +78,14 @@ public class SimpleTextPromptService
             // Accessing dynamic properties using dictionary syntax
             jsonPrompt["93"]["inputs"]["seed"] = random.Next(1, 1000000);
         }
-        
+
         // get the target node
         if (jsonPrompt.ContainsKey("6"))
         {
             // Accessing dynamic properties using dictionary syntax
             jsonPrompt["6"]["inputs"]["text"] = prompt;
         }
-        
+
         // Create the request object
         var request = new JObject();
         request["prompt"] = jsonPrompt;
@@ -157,21 +196,21 @@ public class SimpleTextPromptService
             return false;
         }
     }
-    
+
     public async Task<bool> CheckPromptStatusWithRetry(string promptId, int maxRetries = 10, int retryDelayMs = 5000)
     {
         for (int attempt = 1; attempt <= maxRetries; attempt++)
         {
             bool promptStatus = await GetPromptStatus(promptId);
-        
+
             if (promptStatus)
             {
                 return true;
             }
-        
+
             if (attempt < maxRetries)
             {
-                Console.WriteLine($"Attempt {attempt} failed. Retrying in {retryDelayMs/1000} seconds...");
+                Console.WriteLine($"Attempt {attempt} failed. Retrying in {retryDelayMs / 1000} seconds...");
                 await Task.Delay(retryDelayMs);
             }
             else
@@ -179,6 +218,7 @@ public class SimpleTextPromptService
                 Console.WriteLine($"Max retries ({maxRetries}) reached. Prompt status check failed.");
             }
         }
+
         return false;
     }
 }

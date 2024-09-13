@@ -67,11 +67,12 @@ public class ComfyUIController : ControllerBase
         {
             return BadRequest("系統忙碌中，請稍後再試。");
         }
+
         var imageUrl = await _simpleTextPromptService.GetImageByPromptId(promptId);
         var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
         return Ok(publicUrl);
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> CreateImageByDetailPrompt([FromBody] CreateImageByDetailPrompt request)
     {
@@ -84,12 +85,13 @@ public class ComfyUIController : ControllerBase
         {
             return BadRequest("系統忙碌中，請稍後再試。");
         }
+
         var imageUrl = await _simpleTextPromptService.GetImageByPromptId(promptId);
         var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
         return Ok(publicUrl);
     }
-    
-    
+
+
     [HttpPost]
     public async Task<IActionResult> CreateImageByFluxOptimized([FromBody] CreateImageByPrompt request)
     {
@@ -101,8 +103,18 @@ public class ComfyUIController : ControllerBase
         {
             return BadRequest("系統忙碌中，請稍後再試。");
         }
+
         var imageUrl = await _simpleTextPromptService.GetImageByPromptId(promptId);
         var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
         return Ok(publicUrl);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateFluxPromptWithSeedAndCustomPrompt(
+        [FromBody] CreateBySeedAndPromptRequest request)
+    {
+        var result =
+            await _simpleTextPromptService.CreateFluxPromptWithSeedAndCustomPrompt(request.Prompt, request.Seed);
+        return Ok(result);
     }
 }
