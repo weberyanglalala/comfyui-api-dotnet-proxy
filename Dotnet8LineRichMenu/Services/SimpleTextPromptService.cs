@@ -1,6 +1,7 @@
 using System.Net.WebSockets;
 using System.Text;
 using Dotnet8LineRichMenu.Models.ComfyUIApi.Prompt;
+using Dotnet8LineRichMenu.Models.Dtos.ComfyUI;
 using Dotnet8LineRichMenu.Models.Settings;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -219,5 +220,17 @@ public class SimpleTextPromptService
         }
 
         return false;
+    }
+
+    public async Task<UploadImageResponse> UploadImageToComfyUI(IFormFile file)
+    {
+        var endpoint = $"{_endpoint}/upload/image";
+        var formData = new MultipartFormDataContent();
+        var filename = Guid.NewGuid() + Path.GetExtension(file.FileName);
+        formData.Add(new StreamContent(file.OpenReadStream()), "image", filename);
+        var response = await _httpClient.PostAsync(endpoint, formData);
+        response.EnsureSuccessStatusCode();
+        var responseObject = await response.Content.ReadFromJsonAsync<UploadImageResponse>();
+        return responseObject;
     }
 }

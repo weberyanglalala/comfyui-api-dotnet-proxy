@@ -125,4 +125,21 @@ public class ComfyUIController : ControllerBase
         var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
         return Ok(publicUrl);
     }
+    
+    [HttpPost]
+    public async Task<IActionResult> UploadImageByFile([FromForm] IFormFile file)
+    {
+        // 檢查檔案是否為 null 或空
+        if (file == null || file.Length == 0)
+            return BadRequest("未收到檔案。");
+            
+        // 檢查圖片副檔名
+        var fileType = Path.GetExtension(file.FileName).ToLower();
+        var supportedTypes = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+        if (!supportedTypes.Contains(fileType))
+            return BadRequest("Unsupported file type.");
+        
+        var uploadResult = await _simpleTextPromptService.UploadImageToComfyUI(file);
+        return Ok(uploadResult);
+    }
 }
