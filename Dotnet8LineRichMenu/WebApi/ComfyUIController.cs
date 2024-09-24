@@ -170,4 +170,14 @@ public class ComfyUIController : ControllerBase
         return Ok(new
             { PromptId = result.PromptId, Prompt = request.Prompt, Seed = request.Seed, publicUrl = publicUrl });
     }
+
+    [HttpPost]
+    public async Task<IActionResult> CreatePromptWithSeedAndCustomPromptAndSize(
+        [FromBody] CreateBySeedAndPromptAndSizeRequest request)
+    { 
+        var result =
+            await _simpleTextPromptService.CreateFluxPromptWithSeedAndCustomPromptAndSize(request.Prompt, request.Seed,
+                request.Width, request.Height);
+        return Ok(result);
+    }
 }

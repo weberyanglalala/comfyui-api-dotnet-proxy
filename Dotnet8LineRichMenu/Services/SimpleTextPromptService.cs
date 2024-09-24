@@ -22,6 +22,53 @@ public class SimpleTextPromptService
         _httpClient = httpClientFactory.CreateClient();
     }
 
+    public async Task<string> CreateFluxPromptWithSeedAndCustomPromptAndSize(string prompt, int seed, int width,
+        int height)
+    {
+        var endpoint = $"{_endpoint}/prompt";
+
+        // Load and deserialize JSON using Newtonsoft.Json
+        var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "json", "FluxOptimizedPrompt.json");
+        var jsonData = await File.ReadAllTextAsync(jsonFilePath);
+
+        // Use JObject to access dynamic properties
+        var jsonPrompt = JObject.Parse(jsonData);
+
+        // Initialize the seed
+        if (jsonPrompt.ContainsKey("6"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["93"]["inputs"]["seed"] = seed;
+        }
+
+        // get the target node
+        if (jsonPrompt.ContainsKey("6"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["6"]["inputs"]["text"] = prompt;
+        }
+        
+        if (jsonPrompt.ContainsKey("90"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["90"]["inputs"]["width"] = width;
+            jsonPrompt["90"]["inputs"]["height"] = height;
+        }
+
+        // Create the request object
+        var request = new JObject();
+        request["prompt"] = jsonPrompt;
+        request["client_id"] = _clientId;
+        var jsonString = JsonConvert.SerializeObject(request);
+        // Send the request to the ComfyUI API
+        var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(endpoint, httpContent);
+        response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
+        var responseContent = JsonSerializer.Deserialize<CreatePromptResponse>(responseString);
+        return responseContent.PromptId;
+    }
+
     public async Task<CreateFluxPromptResult> CreateFluxPromptWithSeedAndCustomPrompt(string prompt, int seed)
     {
         var endpoint = $"{_endpoint}/prompt";
@@ -233,8 +280,8 @@ public class SimpleTextPromptService
         var responseObject = await response.Content.ReadFromJsonAsync<UploadImageResponse>();
         return responseObject;
     }
-    
-    public string GetUploadImageUrl(string imageName, string subfolder="", string type="input")
+
+    public string GetUploadImageUrl(string imageName, string subfolder = "", string type = "input")
     {
         var endpoint = $"{_endpoint}/view?subfolder={subfolder}&type={type}&filename={imageName}";
         return endpoint;
