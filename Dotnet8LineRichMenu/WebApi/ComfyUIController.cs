@@ -117,7 +117,7 @@ public class ComfyUIController : ControllerBase
             await _simpleTextPromptService.CreateFluxPromptWithSeedAndCustomPrompt(request.Prompt, request.Seed);
         return Ok(result);
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> GetPromptImageUrlByPromptId([FromQuery] string promptId)
     {
@@ -125,21 +125,49 @@ public class ComfyUIController : ControllerBase
         var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
         return Ok(publicUrl);
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> UploadImageByFile([FromForm] IFormFile file)
     {
         // 檢查檔案是否為 null 或空
         if (file == null || file.Length == 0)
             return BadRequest("未收到檔案。");
-            
+
         // 檢查圖片副檔名
         var fileType = Path.GetExtension(file.FileName).ToLower();
         var supportedTypes = new[] { ".jpg", ".jpeg", ".png", ".webp" };
         if (!supportedTypes.Contains(fileType))
             return BadRequest("Unsupported file type.");
-        
+
         var uploadResult = await _simpleTextPromptService.UploadImageToComfyUI(file);
         return Ok(uploadResult);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetInputUploadImageUrl([FromQuery] string imageName, string subfolder = "")
+    {
+        var imageUrl = _simpleTextPromptService.GetUploadImageUrl(imageName, subfolder);
+        var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
+        return Ok(publicUrl);
+    }
+
+
+    [HttpPost]
+    public async Task<IActionResult> CreatePromptWithSeedAndCustomPrompt(
+        [FromBody] CreateBySeedAndPromptRequest request)
+    {
+        CreateFluxPromptResult result =
+            await _simpleTextPromptService.CreateFluxPromptWithSeedAndCustomPrompt(request.Prompt, request.Seed);
+        bool promptStatus = false;
+        promptStatus = await _simpleTextPromptService.CheckPromptStatusWithRetry(result.PromptId);
+        if (!promptStatus)
+        {
+            return BadRequest("系統忙碌中，請稍後再試。");
+        }
+
+        var imageUrl = await _simpleTextPromptService.GetImageByPromptId(result.PromptId);
+        var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
+        return Ok(new
+            { PromptId = result.PromptId, Prompt = request.Prompt, Seed = request.Seed, publicUrl = publicUrl });
     }
 }

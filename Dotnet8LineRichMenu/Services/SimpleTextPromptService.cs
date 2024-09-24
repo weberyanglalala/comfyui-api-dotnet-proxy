@@ -233,4 +233,10 @@ public class SimpleTextPromptService
         var responseObject = await response.Content.ReadFromJsonAsync<UploadImageResponse>();
         return responseObject;
     }
+    
+    public string GetUploadImageUrl(string imageName, string subfolder="", string type="input")
+    {
+        var endpoint = $"{_endpoint}/view?subfolder={subfolder}&type={type}&filename={imageName}";
+        return endpoint;
+    }
 }
