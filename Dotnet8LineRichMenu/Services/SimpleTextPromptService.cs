@@ -21,7 +21,7 @@ public class SimpleTextPromptService
         _clientId = settings.ClientId;
         _httpClient = httpClientFactory.CreateClient();
     }
-    
+
     public async Task<string> GetFluxStyleChangeImageByPromptId(string promptId)
     {
         var endpoint = $"{_endpoint}/history/{promptId}";
@@ -43,7 +43,9 @@ public class SimpleTextPromptService
         var result = $"{_endpoint}/view?subfolder={imageSubfolder}&type={imageType}&filename={imageFileName}";
         return result;
     }
-    public async Task<string> CreateFluxStyleChangeImageWithStyleAndSeed(string image, string style, int seed, int width, int height)
+
+    public async Task<string> CreateFluxStyleChangeImageWithStyleAndSeed(string image, string style, int seed,
+        int width, int height)
     {
         var endpoint = $"{_endpoint}/prompt";
 
@@ -66,13 +68,13 @@ public class SimpleTextPromptService
         {
             jsonPrompt["22"]["inputs"]["image"] = image;
         }
-        
+
         // setup style
         if (jsonPrompt.ContainsKey("4"))
         {
             jsonPrompt["4"]["inputs"]["text"] = style;
         }
-        
+
         // setup width and height
         if (jsonPrompt.ContainsKey("6"))
         {
@@ -93,6 +95,7 @@ public class SimpleTextPromptService
         var responseContent = JsonSerializer.Deserialize<CreatePromptResponse>(responseString);
         return responseContent.PromptId;
     }
+
 
     public async Task<string> CreateFluxPromptWithSeedAndCustomPromptAndSize(string prompt, int seed, int width,
         int height)
@@ -119,7 +122,7 @@ public class SimpleTextPromptService
             // Accessing dynamic properties using dictionary syntax
             jsonPrompt["6"]["inputs"]["text"] = prompt;
         }
-        
+
         if (jsonPrompt.ContainsKey("90"))
         {
             // Accessing dynamic properties using dictionary syntax

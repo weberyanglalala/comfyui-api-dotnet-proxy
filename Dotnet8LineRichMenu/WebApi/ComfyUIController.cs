@@ -128,9 +128,17 @@ public class ComfyUIController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetPromptImageUrlByPromptId([FromQuery] string promptId)
     {
-        var imageUrl = await _simpleTextPromptService.GetImageByPromptId(promptId);
-        var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
-        return Ok(new { PublicUrl = publicUrl });
+        var status = await _simpleTextPromptService.GetPromptStatus(promptId);
+        if (status)
+        {
+            var imageUrl = await _simpleTextPromptService.GetImageByPromptId(promptId);
+            var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
+            return Ok(new { PublicUrl = publicUrl, IsSuccess = true });
+        }
+        else
+        {
+            return Ok(new { Message = "Prompt is not ready yet or is invalid scope.", IsSuccess = false });
+        }
     }
 
     [HttpGet]
@@ -145,7 +153,7 @@ public class ComfyUIController : ControllerBase
         }
         else
         {
-            return Ok(new { Message = "Prompt is not ready yet or is invalid.", IsSuccess = false });
+            return Ok(new { Message = "Prompt is not ready yet or is invalid scope.", IsSuccess = false });
         }
     }
 
@@ -207,6 +215,7 @@ public class ComfyUIController : ControllerBase
             Height = request.Height
         });
     }
+
 
     [HttpPost]
     public async Task<IActionResult> CreateStyleChangeImageByPrompt(
