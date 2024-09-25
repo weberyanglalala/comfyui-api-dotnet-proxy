@@ -21,6 +21,78 @@ public class SimpleTextPromptService
         _clientId = settings.ClientId;
         _httpClient = httpClientFactory.CreateClient();
     }
+    
+    public async Task<string> GetFluxStyleChangeImageByPromptId(string promptId)
+    {
+        var endpoint = $"{_endpoint}/history/{promptId}";
+        var response = await _httpClient.GetAsync(endpoint);
+        response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        // Use JObject to access dynamic properties
+        var responseJson = JObject.Parse(responseString);
+
+        // Accessing dynamic properties using dictionary syntax
+        var outputs = responseJson[promptId]["outputs"];
+        var image = outputs["12"]["images"][0];
+        var imageFileName = image["filename"];
+        var imageSubfolder = image["subfolder"];
+        var imageType = image["type"];
+
+        // https://{{domain}}/view?filename=ComfyUI_00095_.png&subfolder=&type=output
+        var result = $"{_endpoint}/view?subfolder={imageSubfolder}&type={imageType}&filename={imageFileName}";
+        return result;
+    }
+    public async Task<string> CreateFluxStyleChangeImageWithStyleAndSeed(string image, string style, int seed, int width, int height)
+    {
+        var endpoint = $"{_endpoint}/prompt";
+
+        // Load and deserialize JSON using Newtonsoft.Json
+        var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "json", "FluxStyleChange.json");
+        var jsonData = await File.ReadAllTextAsync(jsonFilePath);
+
+        // Use JObject to access dynamic properties
+        var jsonPrompt = JObject.Parse(jsonData);
+
+        // Initialize the seed
+        if (jsonPrompt.ContainsKey("7"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["7"]["inputs"]["noise_seed"] = seed;
+        }
+
+        // get upload image path
+        if (jsonPrompt.ContainsKey("22"))
+        {
+            jsonPrompt["22"]["inputs"]["image"] = image;
+        }
+        
+        // setup style
+        if (jsonPrompt.ContainsKey("4"))
+        {
+            jsonPrompt["4"]["inputs"]["text"] = style;
+        }
+        
+        // setup width and height
+        if (jsonPrompt.ContainsKey("6"))
+        {
+            jsonPrompt["6"]["inputs"]["width"] = width;
+            jsonPrompt["6"]["inputs"]["height"] = height;
+        }
+
+        // Create the request object
+        var request = new JObject();
+        request["prompt"] = jsonPrompt;
+        request["client_id"] = _clientId;
+
+        // Send the request to the ComfyUI API
+        var httpContent = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(endpoint, httpContent);
+        response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
+        var responseContent = JsonSerializer.Deserialize<CreatePromptResponse>(responseString);
+        return responseContent.PromptId;
+    }
 
     public async Task<string> CreateFluxPromptWithSeedAndCustomPromptAndSize(string prompt, int seed, int width,
         int height)

@@ -1,0 +1,268 @@
+{
+  "1": {
+    "inputs": {
+      "noise": [
+        "7",
+        0
+      ],
+      "guider": [
+        "5",
+        0
+      ],
+      "sampler": [
+        "8",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "2": {
+    "inputs": {
+      "unet_name": "flux1-dev-fp8.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNET載入器"
+    }
+  },
+  "3": {
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "雙CLIP載入器"
+    }
+  },
+  "4": {
+    "inputs": {
+      "text": "Transform the portrait into a surrealist dreamscape inspired by Salvador Dalí. Blend realistic rendering with distorted, melting features. Incorporate symbolic objects and unexpected juxtapositions within a barren, otherworldly landscape.",
+      "speak_and_recognation": true,
+      "clip": [
+        "17",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本編碼器"
+    }
+  },
+  "5": {
+    "inputs": {
+      "model": [
+        "18",
+        0
+      ],
+      "conditioning": [
+        "19",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "6": {
+    "inputs": {
+      "width": 864,
+      "height": 1536,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "空Latent"
+    }
+  },
+  "7": {
+    "inputs": {
+      "noise_seed": 684076014022700
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "8": {
+    "inputs": {
+      "sampler_name": "dpmpp_2m"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "9": {
+    "inputs": {
+      "scheduler": "sgm_uniform",
+      "steps": 8,
+      "denoise": 1,
+      "model": [
+        "18",
+        0
+      ]
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "samples": [
+        "1",
+        0
+      ],
+      "vae": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解碼"
+    }
+  },
+  "11": {
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "VAE載入器"
+    }
+  },
+  "12": {
+    "inputs": {
+      "images": [
+        "15",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "預覽圖像"
+    }
+  },
+  "15": {
+    "inputs": {
+      "enabled": true,
+      "swap_model": "inswapper_128.onnx",
+      "facedetection": "retinaface_resnet50",
+      "face_restore_model": "GPEN-BFR-512.onnx",
+      "face_restore_visibility": 1,
+      "codeformer_weight": 1,
+      "detect_gender_input": "no",
+      "detect_gender_source": "no",
+      "input_faces_index": "0",
+      "source_faces_index": "0",
+      "console_log_level": 1,
+      "input_image": [
+        "10",
+        0
+      ],
+      "source_image": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "ReActorFaceSwap",
+    "_meta": {
+      "title": "ReActor 🌌 Fast Face Swap"
+    }
+  },
+  "17": {
+    "inputs": {
+      "lora_name": "Hyper-FLUX.1-dev-8steps-lora.safetensors",
+      "strength_model": 0.13,
+      "strength_clip": 0.5,
+      "model": [
+        "20",
+        0
+      ],
+      "clip": [
+        "20",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "LoRA載入器"
+    }
+  },
+  "18": {
+    "inputs": {
+      "max_shift": 1.1500000000000001,
+      "base_shift": 0.5,
+      "width": 864,
+      "height": 1536,
+      "model": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingFlux",
+    "_meta": {
+      "title": "ModelSamplingFlux"
+    }
+  },
+  "19": {
+    "inputs": {
+      "guidance": 1.5,
+      "conditioning": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "20": {
+    "inputs": {
+      "lora_name": "F.1-SuperModel_FLUXGIRL.safetensors",
+      "strength_model": 0.25,
+      "strength_clip": 0.5,
+      "model": [
+        "2",
+        0
+      ],
+      "clip": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "LoRA載入器"
+    }
+  },
+  "22": {
+    "inputs": {
+      "image": "/api/view?subfolder=&type=input&filename=6a4d32a3-2dc8-4ff6-a90a-2e9f8a4d0fc0.png",
+      "keep_alpha_channel": false,
+      "output_mode": false,
+      "choose image to upload": "image"
+    },
+    "class_type": "LoadImageFromUrl",
+    "_meta": {
+      "title": "Load Image From URL"
+    }
+  }
+}

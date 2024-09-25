@@ -43,7 +43,7 @@ public class ComfyUIController : ControllerBase
     public async Task<IActionResult> GetPromptStatus([FromQuery] string promptId)
     {
         var result = await _simpleTextPromptService.GetPromptStatus(promptId);
-        return Ok(result);
+        return Ok(new { Result = result });
     }
 
     [HttpPost]
@@ -123,7 +123,15 @@ public class ComfyUIController : ControllerBase
     {
         var imageUrl = await _simpleTextPromptService.GetImageByPromptId(promptId);
         var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
-        return Ok(publicUrl);
+        return Ok(new { PublicUrl = publicUrl });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetFluxStyleChangeImageByPromptId([FromQuery] string promptId)
+    {
+        var imageUrl = await _simpleTextPromptService.GetFluxStyleChangeImageByPromptId(promptId);
+        var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
+        return Ok(new { PublicUrl = publicUrl });
     }
 
     [HttpPost]
@@ -148,7 +156,7 @@ public class ComfyUIController : ControllerBase
     {
         var imageUrl = _simpleTextPromptService.GetUploadImageUrl(imageName, subfolder);
         var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
-        return Ok(publicUrl);
+        return Ok(new { PublicUrl = publicUrl });
     }
 
 
@@ -174,10 +182,23 @@ public class ComfyUIController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreatePromptWithSeedAndCustomPromptAndSize(
         [FromBody] CreateBySeedAndPromptAndSizeRequest request)
-    { 
+    {
         var result =
             await _simpleTextPromptService.CreateFluxPromptWithSeedAndCustomPromptAndSize(request.Prompt, request.Seed,
                 request.Width, request.Height);
-        return Ok(new { PromptId = result, Prompt = request.Prompt, Seed = request.Seed, Width = request.Width, Height = request.Height });
+        return Ok(new
+        {
+            PromptId = result, Prompt = request.Prompt, Seed = request.Seed, Width = request.Width,
+            Height = request.Height
+        });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateStyleChangeImageByPrompt(
+        [FromBody] CreateStyleChangeImageByPromptRequest request)
+    {
+        var promptId = await _simpleTextPromptService.CreateFluxStyleChangeImageWithStyleAndSeed(request.ImageName,
+            request.Style, request.Seed, request.Width, request.Height);
+        return Ok(new { PromptId = promptId });
     }
 }
