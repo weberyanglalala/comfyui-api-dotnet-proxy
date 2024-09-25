@@ -1,18 +1,19 @@
 using CloudinaryDotNet;
+using Dotnet8LineRichMenu.Middleware;
 using Dotnet8LineRichMenu.Models.Settings;
 using Dotnet8LineRichMenu.Services;
 using Microsoft.Extensions.Options;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
+    .ReadFrom.Configuration(hostingContext.Configuration));
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "default",
-        policy  =>
-        {
-            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-        });
+        policy => { policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); });
 });
 builder.Services.AddControllersWithViews();
 builder.Services
@@ -30,7 +31,8 @@ builder.Services
 builder.Services.AddSingleton(sp =>
 {
     var cloudinarySettings = sp.GetRequiredService<CloudinarySettings>();
-    return new Cloudinary(new Account(cloudinarySettings.CloudName, cloudinarySettings.ApiKey, cloudinarySettings.ApiSecret));
+    return new Cloudinary(new Account(cloudinarySettings.CloudName, cloudinarySettings.ApiKey,
+        cloudinarySettings.ApiSecret));
 });
 builder.Services.AddScoped<CloudinaryService>();
 
@@ -46,13 +48,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 app.UseCors("default");
+app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseSerilogRequestLogging();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 app.Run();
