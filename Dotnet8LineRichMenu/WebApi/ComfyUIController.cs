@@ -43,7 +43,14 @@ public class ComfyUIController : ControllerBase
     public async Task<IActionResult> GetPromptStatus([FromQuery] string promptId)
     {
         var result = await _simpleTextPromptService.GetPromptStatus(promptId);
-        return Ok(new { Result = result });
+        if (result)
+        {
+            return Ok(new { IsSuccess = true, Message = "Prompt is Done." });
+        }
+        else
+        {
+            return Ok(new { Message = "Prompt is not ready yet or is invalid.", IsSuccess = false });
+        }
     }
 
     [HttpPost]
@@ -129,9 +136,17 @@ public class ComfyUIController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetFluxStyleChangeImageByPromptId([FromQuery] string promptId)
     {
-        var imageUrl = await _simpleTextPromptService.GetFluxStyleChangeImageByPromptId(promptId);
-        var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
-        return Ok(new { PublicUrl = publicUrl });
+        var status = await _simpleTextPromptService.GetPromptStatus(promptId);
+        if (status)
+        {
+            var imageUrl = await _simpleTextPromptService.GetFluxStyleChangeImageByPromptId(promptId);
+            var publicUrl = await _cloudinaryService.UploadSingleFileAsync(imageUrl);
+            return Ok(new { PublicUrl = publicUrl, IsSuccess = true });
+        }
+        else
+        {
+            return Ok(new { Message = "Prompt is not ready yet or is invalid.", IsSuccess = false });
+        }
     }
 
     [HttpPost]
@@ -199,6 +214,10 @@ public class ComfyUIController : ControllerBase
     {
         var promptId = await _simpleTextPromptService.CreateFluxStyleChangeImageWithStyleAndSeed(request.ImageName,
             request.Style, request.Seed, request.Width, request.Height);
-        return Ok(new { PromptId = promptId, ImageName = request.ImageName, Seed = request.Seed, Width = request.Width, Height = request.Height });
+        return Ok(new
+        {
+            PromptId = promptId, ImageName = request.ImageName, Seed = request.Seed, Width = request.Width,
+            Height = request.Height
+        });
     }
 }
