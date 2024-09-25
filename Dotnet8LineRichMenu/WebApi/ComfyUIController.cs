@@ -199,6 +199,6 @@ public class ComfyUIController : ControllerBase
     {
         var promptId = await _simpleTextPromptService.CreateFluxStyleChangeImageWithStyleAndSeed(request.ImageName,
             request.Style, request.Seed, request.Width, request.Height);
-        return Ok(new { PromptId = promptId });
+        return Ok(new { PromptId = promptId, ImageName = request.ImageName, Seed = request.Seed, Width = request.Width, Height = request.Height });
     }
 }
