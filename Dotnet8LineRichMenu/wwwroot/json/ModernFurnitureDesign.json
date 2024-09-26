@@ -1,7 +1,7 @@
 {
   "10": {
     "inputs": {
-      "seed": 348623530069141,
+      "seed": 59611160057500,
       "steps": 25,
       "cfg": 6,
       "sampler_name": "euler",
@@ -26,7 +26,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "K採樣器"
+      "title": "KSampler"
     }
   },
   "11": {
@@ -35,7 +35,7 @@
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
-      "title": "Checkpoint載入器(簡易)"
+      "title": "Load Checkpoint"
     }
   },
   "12": {
@@ -52,7 +52,7 @@
     },
     "class_type": "EmptyLatentImage",
     "_meta": {
-      "title": "空Latent"
+      "title": "Empty Latent Image"
     }
   },
   "13": {
@@ -69,7 +69,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "CLIP文本編碼器"
+      "title": "CLIP Text Encode (Prompt)"
     }
   },
   "14": {
@@ -86,7 +86,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "CLIP文本編碼器"
+      "title": "CLIP Text Encode (Prompt)"
     }
   },
   "15": {
@@ -102,7 +102,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE解碼"
+      "title": "VAE Decode"
     }
   },
   "19": {
@@ -112,7 +112,7 @@
     },
     "class_type": "LoadImage",
     "_meta": {
-      "title": "載入圖像"
+      "title": "Load Image"
     }
   },
   "20": {
@@ -138,7 +138,7 @@
     },
     "class_type": "ImageInvert",
     "_meta": {
-      "title": "圖像反轉"
+      "title": "Invert Image"
     }
   },
   "23": {
@@ -150,7 +150,7 @@
     },
     "class_type": "ImageGenResolutionFromImage",
     "_meta": {
-      "title": "圖像解析度"
+      "title": "Generation Resolution From Image"
     }
   },
   "44": {
@@ -179,7 +179,7 @@
     },
     "class_type": "SaveImage",
     "_meta": {
-      "title": "儲存圖像"
+      "title": "Save Image"
     }
   },
   "78": {
@@ -197,7 +197,7 @@
     },
     "class_type": "DeepTranslatorTextNode",
     "_meta": {
-      "title": "翻譯文本(進階)"
+      "title": "Deep Translator Text Node"
     }
   },
   "80": {
@@ -206,7 +206,7 @@
     },
     "class_type": "ControlNetLoader",
     "_meta": {
-      "title": "ControlNet載入器"
+      "title": "Load ControlNet Model"
     }
   },
   "84": {
@@ -233,7 +233,7 @@
     },
     "class_type": "ControlNetApplyAdvanced",
     "_meta": {
-      "title": "ControlNet應用(進階)"
+      "title": "Apply ControlNet (Advanced)"
     }
   }
 }
