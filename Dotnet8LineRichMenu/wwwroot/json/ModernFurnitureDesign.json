@@ -1,0 +1,239 @@
+{
+  "10": {
+    "inputs": {
+      "seed": 348623530069141,
+      "steps": 25,
+      "cfg": 6,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": [
+        "11",
+        0
+      ],
+      "positive": [
+        "84",
+        0
+      ],
+      "negative": [
+        "84",
+        1
+      ],
+      "latent_image": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K採樣器"
+    }
+  },
+  "11": {
+    "inputs": {
+      "ckpt_name": "RealitiesEdgeXLLIGHTNING_TURBOV7.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Checkpoint載入器(簡易)"
+    }
+  },
+  "12": {
+    "inputs": {
+      "width": [
+        "23",
+        0
+      ],
+      "height": [
+        "23",
+        1
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "空Latent"
+    }
+  },
+  "13": {
+    "inputs": {
+      "text": [
+        "20",
+        0
+      ],
+      "speak_and_recognation": true,
+      "clip": [
+        "11",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本編碼器"
+    }
+  },
+  "14": {
+    "inputs": {
+      "text": [
+        "20",
+        1
+      ],
+      "speak_and_recognation": true,
+      "clip": [
+        "11",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本編碼器"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "10",
+        0
+      ],
+      "vae": [
+        "11",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解碼"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "living-room-with-yellow-sofa-and-dried-plants-png.webp",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "載入圖像"
+    }
+  },
+  "20": {
+    "inputs": {
+      "styles": "fooocus_styles",
+      "positive": [
+        "78",
+        0
+      ],
+      "select_styles": "sai-3d-model"
+    },
+    "class_type": "easy stylesSelector",
+    "_meta": {
+      "title": "Styles Selector"
+    }
+  },
+  "21": {
+    "inputs": {
+      "image": [
+        "44",
+        0
+      ]
+    },
+    "class_type": "ImageInvert",
+    "_meta": {
+      "title": "圖像反轉"
+    }
+  },
+  "23": {
+    "inputs": {
+      "image": [
+        "44",
+        0
+      ]
+    },
+    "class_type": "ImageGenResolutionFromImage",
+    "_meta": {
+      "title": "圖像解析度"
+    }
+  },
+  "44": {
+    "inputs": {
+      "side_length": 1024,
+      "side": "Longest",
+      "upscale_method": "nearest-exact",
+      "crop": "disabled",
+      "image": [
+        "19",
+        0
+      ]
+    },
+    "class_type": "DF_Image_scale_to_side",
+    "_meta": {
+      "title": "Image scale to side"
+    }
+  },
+  "48": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "15",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "儲存圖像"
+    }
+  },
+  "78": {
+    "inputs": {
+      "from_translate": "auto",
+      "to_translate": "english",
+      "add_proxies": true,
+      "proxies": "",
+      "auth_data": "",
+      "service": "GoogleTranslator",
+      "text": "室内装修，欧式风格",
+      "Show proxy": "proxy_hide",
+      "Show authorization": "authorization_hide",
+      "speak_and_recognation": true
+    },
+    "class_type": "DeepTranslatorTextNode",
+    "_meta": {
+      "title": "翻譯文本(進階)"
+    }
+  },
+  "80": {
+    "inputs": {
+      "control_net_name": "SDXL/xinsircontrolnet-union-sdxl-1.0_promax.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "ControlNet載入器"
+    }
+  },
+  "84": {
+    "inputs": {
+      "strength": 1,
+      "start_percent": 0,
+      "end_percent": 1,
+      "positive": [
+        "13",
+        0
+      ],
+      "negative": [
+        "14",
+        0
+      ],
+      "control_net": [
+        "80",
+        0
+      ],
+      "image": [
+        "21",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "ControlNet應用(進階)"
+    }
+  }
+}

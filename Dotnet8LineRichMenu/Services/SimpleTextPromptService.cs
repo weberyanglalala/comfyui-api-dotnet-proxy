@@ -21,6 +21,75 @@ public class SimpleTextPromptService
         _clientId = settings.ClientId;
         _httpClient = httpClientFactory.CreateClient();
     }
+    
+    public async Task<string> GetFurnitureDesignImageByPromptId(string promptId)
+    {
+        var endpoint = $"{_endpoint}/history/{promptId}";
+        var response = await _httpClient.GetAsync(endpoint);
+        response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        // Use JObject to access dynamic properties
+        var responseJson = JObject.Parse(responseString);
+
+        // Accessing dynamic properties using dictionary syntax
+        var outputs = responseJson[promptId]["outputs"];
+        var image = outputs["48"]["images"][0];
+        var imageFileName = image["filename"];
+        var imageSubfolder = image["subfolder"];
+        var imageType = image["type"];
+
+        // https://{{domain}}/view?filename=ComfyUI_00095_.png&subfolder=&type=output
+        var result = $"{_endpoint}/view?subfolder={imageSubfolder}&type={imageType}&filename={imageFileName}";
+        return result;
+    }
+
+    public async Task<string> CreateFurnitureDesign(string imageName, string style, int seed)
+    {
+        var endpoint = $"{_endpoint}/prompt";
+
+        // Load and deserialize JSON using Newtonsoft.Json
+        var jsonFilePath =
+            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "json", "ModernFurnitureDesign.json");
+        var jsonData = await File.ReadAllTextAsync(jsonFilePath);
+
+        // Use JObject to access dynamic properties
+        var jsonPrompt = JObject.Parse(jsonData);
+
+        // Initialize the seed
+        if (jsonPrompt.ContainsKey("10"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["10"]["inputs"]["seed"] = seed;
+        }
+
+        // get upload image path
+        if (jsonPrompt.ContainsKey("19"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["19"]["inputs"]["image"] = imageName;
+        }
+
+        // setup style
+        if (jsonPrompt.ContainsKey("78"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["78"]["inputs"]["text"] = style;
+        }
+
+        // Create the request object
+        var request = new JObject();
+        request["prompt"] = jsonPrompt;
+        request["client_id"] = _clientId;
+
+        // Send the request to the ComfyUI API
+        var httpContent = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(endpoint, httpContent);
+        response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
+        var responseContent = JsonSerializer.Deserialize<CreatePromptResponse>(responseString);
+        return responseContent.PromptId;
+    }
 
     public async Task<string> GetFluxStyleChangeImageByPromptId(string promptId)
     {
