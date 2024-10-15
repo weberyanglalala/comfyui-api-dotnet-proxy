@@ -2,6 +2,10 @@ namespace Dotnet8LineRichMenu.Models;
 
 public class ApiResponse
 {
+    public ApiResponse()
+    {
+        
+    }
     public ApiResponse(object body, string message = "")
     {
         Body = body;

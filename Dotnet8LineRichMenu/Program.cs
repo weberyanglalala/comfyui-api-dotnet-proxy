@@ -2,6 +2,7 @@ using CloudinaryDotNet;
 using Dotnet8LineRichMenu.Middleware;
 using Dotnet8LineRichMenu.Models.Settings;
 using Dotnet8LineRichMenu.Services;
+using Dotnet8LineRichMenu.Services.Dify;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -35,6 +36,7 @@ builder.Services.AddSingleton(sp =>
         cloudinarySettings.ApiSecret));
 });
 builder.Services.AddScoped<CloudinaryService>();
+builder.Services.AddScoped<DifyService>();
 
 var app = builder.Build();
 
