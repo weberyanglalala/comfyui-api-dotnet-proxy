@@ -21,7 +21,90 @@ public class SimpleTextPromptService
         _clientId = settings.ClientId;
         _httpClient = httpClientFactory.CreateClient();
     }
-    
+
+    public async Task<List<string>> GetCharacterPhotosByPromptId(string promptId)
+    {
+        var endpoint = $"{_endpoint}/history/{promptId}";
+        var response = await _httpClient.GetAsync(endpoint);
+        response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        // Use JObject to access dynamic properties
+        var responseJson = JObject.Parse(responseString);
+
+        // result
+        var imageList = new List<string>();
+        // Accessing dynamic properties using dictionary syntax
+        var outputs = responseJson[promptId]["outputs"];
+        var images = outputs["12"]["images"];
+        foreach (var image in images)
+        {
+            var imageFileName = image["filename"];
+            var imageSubfolder = image["subfolder"];
+            var imageType = image["type"];
+            var result = $"{_endpoint}/view?subfolder={imageSubfolder}&type={imageType}&filename={imageFileName}";
+            imageList.Add(result);
+        }
+
+        return imageList;
+    }
+
+
+    public async Task<string> CreateCharacterPhoto(string imageName, string style, int seed, int count = 4, int width = 864,
+        int height = 1534)
+    {
+        var endpoint = $"{_endpoint}/prompt";
+        // Load and deserialize JSON using Newtonsoft.Json
+        var jsonFilePath =
+            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "json", "CharacterPhoto.json");
+        var jsonData = await File.ReadAllTextAsync(jsonFilePath);
+        // Use JObject to access dynamic properties
+        var jsonPrompt = JObject.Parse(jsonData);
+
+        // Initialize the seed
+        if (jsonPrompt.ContainsKey("7"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["7"]["inputs"]["noise_seed"] = seed;
+        }
+
+        // get upload image path
+        if (jsonPrompt.ContainsKey("22"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["22"]["inputs"]["image"] = imageName;
+        }
+
+        // setup style
+        if (jsonPrompt.ContainsKey("4"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["4"]["inputs"]["text"] = style;
+        }
+        
+        // setup count
+        if (jsonPrompt.ContainsKey("6"))
+        {
+            // Accessing dynamic properties using dictionary syntax
+            jsonPrompt["6"]["inputs"]["batch_size"] = count;
+            jsonPrompt["6"]["inputs"]["width"] = width;
+            jsonPrompt["6"]["inputs"]["height"] = height;
+        }
+
+        // Create the request object
+        var request = new JObject();
+        request["prompt"] = jsonPrompt;
+        request["client_id"] = _clientId;
+
+        // Send the request to the ComfyUI API
+        var httpContent = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(endpoint, httpContent);
+        response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
+        var responseContent = JsonSerializer.Deserialize<CreatePromptResponse>(responseString);
+        return responseContent.PromptId;
+    }
+
     public async Task<string> GetFurnitureDesignImageByPromptId(string promptId)
     {
         var endpoint = $"{_endpoint}/history/{promptId}";
