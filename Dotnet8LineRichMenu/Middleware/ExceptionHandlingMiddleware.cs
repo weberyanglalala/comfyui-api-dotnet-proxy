@@ -1,4 +1,5 @@
 using Dotnet8LineRichMenu.Common.Exceptions;
+using Dotnet8LineRichMenu.Models;
 
 namespace Dotnet8LineRichMenu.Middleware;
 
@@ -42,9 +43,13 @@ public class ExceptionHandlingMiddleware
                 problemDetails.Extensions["errors"] = exceptionDetails.Errors;
             }
 
-            context.Response.StatusCode = exceptionDetails.Status;
-
-            await context.Response.WriteAsJsonAsync(problemDetails);
+            var apiResponse = new ApiResponse
+            {
+                Message = exception.Message,
+                IsSuccess = false,
+            };
+            context.Response.StatusCode = StatusCodes.Status200OK;
+            await context.Response.WriteAsJsonAsync(apiResponse);
         }
     }
 

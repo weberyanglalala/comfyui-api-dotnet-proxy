@@ -1,3 +1,4 @@
+#nullable enable
 namespace Dotnet8LineRichMenu.Models;
 
 public class ApiResponse
@@ -12,6 +13,7 @@ public class ApiResponse
         Message = !string.IsNullOrWhiteSpace(message) ? message : "Operation Done Successfully.";
     }
 
-    public object Body { get; set; }
+    public object? Body { get; set; }
     public string Message { get; set; }
+    public bool IsSuccess { get; set; } = true;
 }
