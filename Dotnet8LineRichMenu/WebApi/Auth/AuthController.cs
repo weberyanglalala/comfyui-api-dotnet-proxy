@@ -20,7 +20,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterUserModel model)
     {
         var apiResponse = new ApiResponse();
-        if (await _userService.RegisterUser(model.Username, model.Email, model.Password))
+        if (await _userService.RegisterUser(model.Email, model.Password))
         {
             apiResponse.Message = "User registered successfully";
             return Ok(apiResponse);

@@ -27,14 +27,14 @@ namespace Dotnet8LineRichMenu.Services.UserService
         }
 
         // Register a new user
-        public async Task<bool> RegisterUser(string username, string email, string password)
+        public async Task<bool> RegisterUser(string email, string password)
         {
             // Check if user already exists
-            var existingUser = await _users.Find(user => user.Email == email || user.Username == username)
+            var existingUser = await _users.Find(user => user.Email == email)
                 .FirstOrDefaultAsync();
             if (existingUser != null)
             {
-                return false; // User already exists
+                return false;
             }
 
             // Hash the password using SHA256
@@ -43,7 +43,7 @@ namespace Dotnet8LineRichMenu.Services.UserService
             // Create a new user
             var newUser = new User
             {
-                Username = username,
+                Username = email,
                 Email = email,
                 PasswordHash = passwordHash,
                 IsVerified = false
