@@ -14,6 +14,6 @@ public class ApiResponse
     }
 
     public object? Body { get; set; }
-    public string Message { get; set; }
+    public string? Message { get; set; }
     public bool IsSuccess { get; set; } = true;
 }

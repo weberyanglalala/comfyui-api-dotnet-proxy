@@ -1,10 +1,12 @@
 using Dotnet8LineRichMenu.Models;
 using Dotnet8LineRichMenu.Services;
 using Dotnet8LineRichMenu.WebApi.CharacterPhoto.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dotnet8LineRichMenu.WebApi.CharacterPhoto;
 
+[Authorize]
 [Route("api/[controller]/[action]")]
 [ApiController]
 public class CharacterPhotoController : ControllerBase

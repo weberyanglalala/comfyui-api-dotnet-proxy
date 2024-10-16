@@ -1,10 +1,12 @@
 using Dotnet8LineRichMenu.Models;
 using Dotnet8LineRichMenu.Services;
 using Dotnet8LineRichMenu.WebApi.FurnitureDesign.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dotnet8LineRichMenu.WebApi.FurnitureDesign;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]/[action]")]
 public class FurnitureDesignController : ControllerBase

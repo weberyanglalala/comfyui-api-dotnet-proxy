@@ -2,10 +2,12 @@ using Dotnet8LineRichMenu.Models;
 using Dotnet8LineRichMenu.Services.Dify;
 using Dotnet8LineRichMenu.Services.Dify.Dtos;
 using Dotnet8LineRichMenu.WebApi.Dify.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dotnet8LineRichMenu.WebApi.Dify;
 
+[Authorize]
 [Route("api/[controller]/[action]")]
 [ApiController]
 public class DifyController : ControllerBase

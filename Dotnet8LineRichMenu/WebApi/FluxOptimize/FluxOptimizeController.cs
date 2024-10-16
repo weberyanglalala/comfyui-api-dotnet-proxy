@@ -1,10 +1,12 @@
 using Dotnet8LineRichMenu.Models;
 using Dotnet8LineRichMenu.Services;
 using Dotnet8LineRichMenu.WebApi.FluxOptimize.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dotnet8LineRichMenu.WebApi.FluxOptimize;
 
+[Authorize]
 [Route("api/[controller]/[action]")]
 [ApiController]
 public class FluxOptimizeController : ControllerBase

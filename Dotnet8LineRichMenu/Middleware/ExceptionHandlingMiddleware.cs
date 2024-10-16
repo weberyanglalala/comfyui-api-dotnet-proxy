@@ -1,3 +1,4 @@
+#nullable enable
 using Dotnet8LineRichMenu.Common.Exceptions;
 using Dotnet8LineRichMenu.Models;
 
@@ -72,7 +73,7 @@ public class ExceptionHandlingMiddleware
         };
     }
 
-    internal sealed record ExceptionDetails(
+    private sealed record ExceptionDetails(
         int Status,
         string Type,
         string Title,

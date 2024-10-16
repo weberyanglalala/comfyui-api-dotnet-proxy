@@ -1,10 +1,12 @@
 using Dotnet8LineRichMenu.Models.ComfyUIApi.Prompt;
 using Dotnet8LineRichMenu.Models.Dtos.ComfyUI;
 using Dotnet8LineRichMenu.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Dotnet8LineRichMenu.WebApi.ComfyUI;
+namespace Dotnet8LineRichMenu.WebApi;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]/[action]")]
 public class ComfyUIController : ControllerBase
