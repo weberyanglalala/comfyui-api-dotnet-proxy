@@ -11,7 +11,7 @@ public class CloudinaryService
     public CloudinaryService(Cloudinary cloudinary, IHttpClientFactory httpClientFactory)
     {
         _cloudinary = cloudinary;
-        _httpClient = httpClientFactory.CreateClient();
+        _httpClient = httpClientFactory.CreateClient("ComfyUIHttpClient");
     }
     
     public async Task<string> UploadSingleFileAsync(string url, string publicId = null, int maxRetries = 3, int retryDelayMs = 1000)
