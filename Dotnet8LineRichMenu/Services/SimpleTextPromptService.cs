@@ -19,7 +19,7 @@ public class SimpleTextPromptService
     {
         _endpoint = settings.Endpoint;
         _clientId = settings.ClientId;
-        _httpClient = httpClientFactory.CreateClient();
+        _httpClient = httpClientFactory.CreateClient("ComfyUIHttpClient");
     }
 
     public async Task<List<string>> GetCharacterPhotosByPromptId(string promptId)

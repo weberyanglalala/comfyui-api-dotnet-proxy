@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Text;
 using CloudinaryDotNet;
 using Dotnet8LineRichMenu.Middleware;
@@ -17,7 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
 
-builder.Services.AddScoped<UserService>(); 
+builder.Services.AddScoped<UserService>();
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -51,6 +52,17 @@ builder.Services
     .Configure<SimpleTextPromptFlowSettings>(builder.Configuration.GetSection(nameof(SimpleTextPromptFlowSettings)))
     .AddSingleton(settings => settings.GetRequiredService<IOptions<SimpleTextPromptFlowSettings>>().Value);
 builder.Services.AddHttpClient();
+var simpleChatSettings = builder.Services.BuildServiceProvider()
+    .GetRequiredService<IOptions<SimpleTextPromptFlowSettings>>().Value;
+builder.Services.AddHttpClient("ComfyUIHttpClient", client =>
+{
+    var difyUrl = simpleChatSettings.Endpoint;
+    var username = simpleChatSettings.Username;
+    var password = simpleChatSettings.Password;
+    var base64Auth = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64Auth);
+    client.BaseAddress = new Uri(difyUrl);
+});
 builder.Services.AddScoped<SimpleTextPromptService>();
 builder.Services.AddScoped<StableDiffusionPromptEnhancerService>();
 builder.Services
