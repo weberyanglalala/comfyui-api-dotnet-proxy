@@ -1,40 +1,58 @@
 using Dotnet8LineRichMenu.Models.MongoDB;
-using Dotnet8LineRichMenu.Models.Settings;
-using Microsoft.Extensions.Options;
-using MongoDB.Driver;
+using Dotnet8LineRichMenu.Services.DifyLineChat.Dtos.DifyApiService;
 
 namespace Dotnet8LineRichMenu.Services.DifyLineChat;
 
 public class DifyLineChatService
 {
-    private readonly IMongoCollection<DifyChatLineUser> _lineUsers;
-    private readonly IMongoCollection<DifyChatLineConversation> _lineConversations;
-    private readonly MongoDbSettings _mongoDbSettings;
-    private readonly IConfiguration _configuration;
+    private readonly LineChatMongoService _lineChatMongoService;
+    private readonly DifyApiService _difyApiService;
 
-    public DifyLineChatService(IOptions<MongoDbSettings> mongoDbSettings, IConfiguration configuration,
-        IMongoCollection<DifyChatLineConversation> lineConversations)
+    public DifyLineChatService(LineChatMongoService lineChatMongoService, DifyApiService difyApiService)
     {
-        _configuration = configuration;
-        _lineConversations = lineConversations;
-        _mongoDbSettings = mongoDbSettings.Value;
-
-        var client = new MongoClient(_mongoDbSettings.ConnectionString);
-        var database = client.GetDatabase(_mongoDbSettings.DatabaseName);
-        _lineUsers = database.GetCollection<DifyChatLineUser>("DifyChatLineUsers");
+        _lineChatMongoService = lineChatMongoService;
+        _difyApiService = difyApiService;
     }
 
-    public async Task<string> GetLineUserIdByDifyUserId(string difyUserId)
+    public async Task<string> HandleLineChat(string lineUserId, string displayName, string message)
     {
-        var user = await _lineUsers.Find(lineUser => lineUser.Id == difyUserId)
-            .FirstOrDefaultAsync();
-        return user?.LineUserId;
+        // Check if Line User exists
+        var user = await GetOrCreateUser(lineUserId, displayName);
+
+        // Check if Conversation exists for the user
+        var conversation = await _lineChatMongoService.GetCurrentConversationByUserId(user.Id);
+
+        // If no conversation exists, create one
+        var response = await SendMessageAsync(user.Id, message, conversation?.DifyConversationId);
+        if (conversation == null)
+        {
+            await _lineChatMongoService.CreateConversationByLineUserId(lineUserId, response.DifyConversationId);
+        }
+
+        return response.Message;
     }
 
-    public async Task<DifyChatLineConversation> GetConversationById(string conversationId)
+    private async Task<DifyChatLineUser> GetOrCreateUser(string lineUserId, string displayName)
     {
-        var conversation = await _lineConversations.Find(conversation => conversation.ConversationId == conversationId)
-            .FirstOrDefaultAsync();
-        return conversation;
+        var user = await _lineChatMongoService.GetUserByLineUserId(lineUserId);
+        if (user == null)
+        {
+            user = await _lineChatMongoService.CreateLineUser(lineUserId, displayName);
+        }
+
+        return user;
+    }
+
+    private async Task<ChatMessagesResponse> SendMessageAsync(string userId, string message, string conversationId)
+    {
+        var response = await _difyApiService.SendChatMessageAsync(new ChatMessagesRequest
+        {
+            User = userId,
+            Query = message,
+            ResponseMode = "streaming",
+            ConversationId = conversationId ?? string.Empty,
+            Inputs = { }
+        });
+        return response;
     }
 }

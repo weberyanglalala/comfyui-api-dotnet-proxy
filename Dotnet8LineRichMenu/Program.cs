@@ -5,6 +5,7 @@ using Dotnet8LineRichMenu.Middleware;
 using Dotnet8LineRichMenu.Models.Settings;
 using Dotnet8LineRichMenu.Services;
 using Dotnet8LineRichMenu.Services.Dify;
+using Dotnet8LineRichMenu.Services.DifyLineChat;
 using Dotnet8LineRichMenu.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
@@ -18,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
 
+// AuthServices
 builder.Services.AddScoped<UserService>();
 builder.Services.AddAuthentication(options =>
     {
@@ -37,20 +39,28 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+
+// Serilog
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
     .ReadFrom.Configuration(hostingContext.Configuration));
+
+// Set Cors
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "default",
         policy => { policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); });
 });
 builder.Services.AddControllersWithViews();
+
+// Set up Line Chat Message With Comfy UI Service
 builder.Services
     .Configure<LineMessagingApiSettings>(builder.Configuration.GetSection(nameof(LineMessagingApiSettings)))
     .AddSingleton(settings => settings.GetRequiredService<IOptions<LineMessagingApiSettings>>().Value);
 builder.Services
     .Configure<SimpleTextPromptFlowSettings>(builder.Configuration.GetSection(nameof(SimpleTextPromptFlowSettings)))
     .AddSingleton(settings => settings.GetRequiredService<IOptions<SimpleTextPromptFlowSettings>>().Value);
+
+// Custom HttpClient for Comfy UI
 builder.Services.AddHttpClient();
 var simpleChatSettings = builder.Services.BuildServiceProvider()
     .GetRequiredService<IOptions<SimpleTextPromptFlowSettings>>().Value;
@@ -63,8 +73,12 @@ builder.Services.AddHttpClient("ComfyUIHttpClient", client =>
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64Auth);
     client.BaseAddress = new Uri(difyUrl);
 });
+
+// Comfy UI Services
 builder.Services.AddScoped<SimpleTextPromptService>();
 builder.Services.AddScoped<StableDiffusionPromptEnhancerService>();
+
+// Cloudinary Service
 builder.Services
     .Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)))
     .AddSingleton(settings => settings.GetRequiredService<IOptions<CloudinarySettings>>().Value);
@@ -75,7 +89,15 @@ builder.Services.AddSingleton(sp =>
         cloudinarySettings.ApiSecret));
 });
 builder.Services.AddScoped<CloudinaryService>();
+
+// Dify Api Service 
 builder.Services.AddScoped<DifyService>();
+
+// Dify Line Chat
+builder.Services.Configure<DifyLineChatSettings>(builder.Configuration.GetSection(nameof(DifyLineChatSettings)));
+builder.Services.AddScoped<LineChatMongoService>();
+builder.Services.AddScoped<DifyApiService>();
+builder.Services.AddScoped<DifyLineChatService>();
 
 var app = builder.Build();
 

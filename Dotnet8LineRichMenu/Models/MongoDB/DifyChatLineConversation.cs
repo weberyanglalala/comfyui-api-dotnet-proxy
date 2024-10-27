@@ -18,8 +18,8 @@ public class DifyChatLineConversation
     [BsonElement("updateAt")]
     public DateTime UpdateAt { get; set; }
 
-    [BsonElement("messageCount")]
-    public int MessageCount { get; set; }
+    [BsonElement("status")]
+    public int Status { get; set; }
 
     [BsonElement("userId")]
     [BsonRepresentation(BsonType.ObjectId)]
