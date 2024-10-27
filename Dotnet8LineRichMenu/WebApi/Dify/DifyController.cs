@@ -41,6 +41,23 @@ public class DifyController : ControllerBase
         apiResponse.Message = "Image created successfully";
         return Ok(apiResponse);
     }
-    
+
+    [HttpPost]
+    public async Task<IActionResult> CreateTravelProductByProductName([FromBody]CreateTravelProductByProductNameRequest request)
+    {
+        var inputs = new Dictionary<string, object>();
+        inputs.Add("product_name", request.ProductName);
+        var runWorkflowRequest = new DifyWorkflowRequest()
+        {
+            Inputs = inputs,
+            ResponseMode = "blocking",
+            User = _difyUserId
+        };
+        var response = await _difyService.CreateTravelProduct(runWorkflowRequest);
+        var apiResponse = new ApiResponse();
+        apiResponse.Body = response.Data.Outputs;
+        apiResponse.Message = "Travel Detail created successfully";
+        return Ok(apiResponse);
+    }
     
 }
